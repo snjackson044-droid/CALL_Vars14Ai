@@ -50,3 +50,67 @@ jobs:
           output=$(printf '2\n3\n4\n0\n' | ./call_vars)
           echo "$output" | grep -q "Standard multiplication: 12.0000"
           echo "$output" | grep -q "Fox multiplication: 24.0000"
+name: CALL-VARS
+
+# Workflow for CALL-VARS (snjackson044-droid/CALL_Vars14Ai).
+# Compiles call_vars.cpp and runs smoke tests on every push / PR to
+# main that touches the program, the check script, or this workflow.
+#
+# CALL-VARS is a C++ console program: the CALL-VARS black fox AI
+# assistant, with FoxCharacter, the FoxMathEngine (StandardMath vs
+# FoxMath dual multiplication), and a FoxMail inbox stored in
+# call_vars_inbox.txt. See docs/WORKFLOW.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "call_vars.cpp"
+      - "scripts/call-vars-check.sh"
+      - ".github/workflows/call-vars.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "call_vars.cpp"
+      - "scripts/call-vars-check.sh"
+      - ".github/workflows/call-vars.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Compile
+        run: g++ -std=c++17 -Wall -Wextra -o call_vars call_vars.cpp
+
+      - name: Smoke test — start up and shut down
+        run: |
+          output=$(printf '0\n' | ./call_vars)
+          echo "$output" | grep -q "CALL-VARS AI"
+          echo "$output" | grep -q "FoxMath Engine: ONLINE"
+          echo "$output" | grep -q "FoxMail Engine: ONLINE"
+          echo "$output" | grep -q "CALL-VARS shutdown complete"
+
+      - name: Smoke test — Fox Math Engine (3 x 4)
+        run: |
+          output=$(printf '2\n3\n4\n0\n' | ./call_vars)
+          echo "$output" | grep -q "Standard multiplication: 12.0000"
+          echo "$output" | grep -q "Fox multiplication: 24.0000"
+
+      - name: Smoke test — Fox spatial engine (3D-7D)
+        run: |
+          output=$(printf '6\n9\n5\n7\n0\n2\n8\n0\n1\n90\n6\n0\n' | ./call_vars)
+          echo "$output" | grep -q "Spatial Engine: ONLINE (3D-7D)"
+          echo "$output" | grep -q "FOX SPATIAL VIEW (3D-7D)"
+          echo "$output" | grep -q "Dimensional space set to 5D"
+          echo "$output" | grep -q "Fox moved."
+          echo "$output" | grep -q "Fox rotated."
+          echo "$output" | grep -q "F = CALL-VARS"
+          echo "$output" | grep "Fox position:" | grep -q "2 0 0 0"
+          echo "
